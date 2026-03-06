@@ -2,14 +2,14 @@
 import { useState } from "react";
 
 const videos = [
-  { id: 1, title: "Count to 10", q: "Count to 10 for toddlers", emoji: "🔢" },
-  { id: 2, title: "ABC Song", q: "ABC song super simple", emoji: "🔤" },
-  { id: 3, title: "Colors Song", q: "colors song for toddlers", emoji: "🌈" },
-  { id: 4, title: "Rhyming", q: "rhyming words for kids", emoji: "🎤" }
+  { id: 1, title: "Count to 10", ytid: "XqZsoesa55w", emoji: "🔢" },
+  { id: 2, title: "ABC Song", ytid: "75p-N9YKqNo", emoji: "🔤" },
+  { id: 3, title: "Colors Song", ytid: "ybt2jhCQ3lA", emoji: "🌈" },
+  { id: 4, title: "Rhyming", ytid: "3JZi2oDvPs4", emoji: "🎤" }
 ];
 
 function srcFor(v) {
-  return "https://www.youtube.com/embed?listType=search&list=" + encodeURIComponent(v.q) + "&autoplay=1&rel=0&controls=1&playsinline=1";
+  return `https://www.youtube.com/embed/${v.ytid}?autoplay=1&rel=0&controls=1&playsinline=1`;
 }
 
 export default function HomePage() {
@@ -24,6 +24,9 @@ export default function HomePage() {
             <iframe title={current.title} width="100%" height="100%" src={srcFor(current)} frameBorder="0" allow="autoplay; encrypted-media" />
           </div>
         </div>
+        <a href={`https://www.youtube.com/watch?v=${current.ytid}`} target="_blank" rel="noreferrer" style={{display:"inline-block",marginTop:8,color:"#A7F3D0",fontWeight:700}}>
+          If blocked, open in YouTube ↗
+        </a>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 10, marginTop: 10 }}>
         {videos.map(v => (

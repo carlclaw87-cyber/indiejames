@@ -35,22 +35,140 @@ const srcFor = (ytid) =>
   `https://www.youtube-nocookie.com/embed/${ytid}?autoplay=1&rel=0&controls=1&playsinline=1&modestbranding=1`;
 
 const TAGS = ["All", "counting", "abcs", "phonics", "colors", "math", "shapes", "science", "social", "world", "movement", "patterns"];
+const PARENT_PIN = "1234";
 
 export default function Page() {
   const [currentId, setCurrentId] = useState(VIDEOS[0].id);
   const [filter, setFilter] = useState("All");
+  const [showParent, setShowParent] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [dur, setDur] = useState(30);
+  const [activeIds, setActiveIds] = useState(() => VIDEOS.map(v => v.id));
+
   const current = useMemo(() => VIDEOS.find(v => v.id === currentId) || VIDEOS[0], [currentId]);
-  const filtered = useMemo(() => filter === "All" ? VIDEOS : VIDEOS.filter(v => v.tags === filter), [filter]);
+  const filtered = useMemo(() => {
+    const pool = filter === "All" ? VIDEOS : VIDEOS.filter(v => v.tags === filter);
+    return pool.filter(v => activeIds.includes(v.id));
+  }, [filter, activeIds]);
+
+  function tryPin() {
+    if (pinInput === PARENT_PIN) {
+      setShowParent(true);
+      setShowPinModal(false);
+      setPinInput("");
+      setPinError(false);
+    } else {
+      setPinError(true);
+      setPinInput("");
+    }
+  }
+
+  function toggleVideo(id) {
+    setActiveIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
+
+  if (showParent) {
+    return (
+      <div style={{ background: "#0f0f0f", minHeight: "100vh", color: "#fff", fontFamily: "Roboto, Arial, sans-serif", padding: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 22 }}>🌱</span>
+            <span style={{ fontWeight: 700, fontSize: 20 }}>IndieTube — Parent Dashboard</span>
+          </div>
+          <button onClick={() => setShowParent(false)}
+            style={{ background: "#272727", border: "none", color: "#fff", padding: "8px 16px", borderRadius: 20, cursor: "pointer", fontSize: 14 }}>
+            ← Back to App
+          </button>
+        </div>
+
+        {/* Session duration */}
+        <div style={{ background: "#1a1a1a", borderRadius: 12, padding: 20, marginBottom: 20 }}>
+          <div style={{ fontWeight: 600, marginBottom: 12, fontSize: 16 }}>⏱️ Session Duration</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            {[20, 30, 45, 60].map(d => (
+              <button key={d} onClick={() => setDur(d)}
+                style={{ padding: "10px 20px", borderRadius: 20, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 14,
+                  background: dur === d ? "#ff0000" : "#272727", color: "#fff" }}>
+                {d} min
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Video queue manager */}
+        <div style={{ background: "#1a1a1a", borderRadius: 12, padding: 20 }}>
+          <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 16 }}>🎬 Queue ({activeIds.length} active)</div>
+          <div style={{ color: "#aaa", fontSize: 13, marginBottom: 16 }}>Toggle videos on/off for Indie's session</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
+            {VIDEOS.map(v => {
+              const on = activeIds.includes(v.id);
+              return (
+                <button key={v.id} onClick={() => toggleVideo(v.id)}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: 10, borderRadius: 10, border: "none", cursor: "pointer", textAlign: "left",
+                    background: on ? "#1a2e1a" : "#1a1a1a",
+                    outline: on ? "1px solid #34d399" : "1px solid #333",
+                    color: "#fff", opacity: on ? 1 : 0.45 }}>
+                  {v.ytid ? (
+                    <img src={thumbFor(v.ytid)} alt="" width={80} height={45} style={{ borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 80, height: 45, background: "#222", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{v.emoji}</div>
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{v.title}</div>
+                    <div style={{ color: "#aaa", fontSize: 11, marginTop: 2 }}>{v.channel} • {v.duration}</div>
+                  </div>
+                  <div style={{ marginLeft: "auto", fontSize: 18, flexShrink: 0 }}>{on ? "✅" : "⬜"}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: "#0f0f0f", minHeight: "100vh", color: "#fff", fontFamily: "Roboto, Arial, sans-serif" }}>
 
+      {/* PIN Modal */}
+      {showPinModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#1a1a1a", borderRadius: 16, padding: 32, width: 300, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
+            <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Parent Access</div>
+            <div style={{ color: "#aaa", fontSize: 14, marginBottom: 20 }}>Enter your PIN to continue</div>
+            <input type="password" value={pinInput} onChange={e => setPinInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && tryPin()}
+              placeholder="PIN" maxLength={6}
+              style={{ width: "100%", padding: "12px", borderRadius: 10, border: pinError ? "2px solid #ff4444" : "2px solid #333",
+                background: "#111", color: "#fff", fontSize: 20, textAlign: "center", outline: "none", boxSizing: "border-box" }} />
+            {pinError && <div style={{ color: "#ff4444", fontSize: 13, marginTop: 8 }}>Incorrect PIN</div>}
+            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+              <button onClick={() => { setShowPinModal(false); setPinInput(""); setPinError(false); }}
+                style={{ flex: 1, padding: 12, borderRadius: 10, border: "none", background: "#333", color: "#fff", cursor: "pointer", fontSize: 14 }}>
+                Cancel
+              </button>
+              <button onClick={tryPin}
+                style={{ flex: 1, padding: 12, borderRadius: 10, border: "none", background: "#ff0000", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>
+                Unlock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Nav */}
-      <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#0f0f0f", borderBottom: "1px solid #272727", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#0f0f0f", borderBottom: "1px solid #272727", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 22 }}>🌱</span>
           <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: "-0.5px" }}>IndieTube</span>
         </div>
+        <button onClick={() => setShowPinModal(true)}
+          style={{ background: "transparent", border: "1px solid #333", color: "#aaa", padding: "6px 12px", borderRadius: 20, cursor: "pointer", fontSize: 13 }}>
+          🔒 Parent
+        </button>
       </div>
 
       {/* Filter chips */}
@@ -70,19 +188,24 @@ export default function Page() {
 
         {/* Player + info column */}
         <div style={{ flex: "1 1 0", minWidth: 0, marginRight: 24 }}>
-          {/* Player */}
-          <div style={{ background: "#000", borderRadius: 12, overflow: "hidden", aspectRatio: "16/9" }}>
+          {/* Player with corner blockers */}
+          <div style={{ position: "relative", background: "#000", borderRadius: 12, overflow: "hidden", aspectRatio: "16/9" }}>
             {current.ytid ? (
               <iframe title={current.title} width="100%" height="100%"
                 src={srcFor(current.ytid)} frameBorder="0"
                 allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen
-                style={{ display: "block" }} />
+                style={{ display: "block", width: "100%", height: "100%" }} />
             ) : (
               <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
                 <span style={{ fontSize: 48 }}>{current.emoji}</span>
                 <span style={{ opacity: 0.6, fontSize: 14 }}>No embed ID yet</span>
               </div>
             )}
+            {/* Corner blockers — covers "Watch on YouTube" and chain link overlays */}
+            <div style={{ position: "absolute", top: 0, left: 0, width: "20%", height: "18%", zIndex: 10 }} />
+            <div style={{ position: "absolute", top: 0, right: 0, width: "20%", height: "18%", zIndex: 10 }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, width: "20%", height: "18%", zIndex: 10 }} />
+            <div style={{ position: "absolute", bottom: 0, right: 0, width: "35%", height: "18%", zIndex: 10 }} />
           </div>
 
           {/* Video info */}
@@ -97,14 +220,6 @@ export default function Page() {
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{current.channel}</div>
                   <div style={{ color: "#aaa", fontSize: 12 }}>{current.views}</div>
                 </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#272727", border: "none", color: "#fff", padding: "8px 16px", borderRadius: 20, cursor: "pointer", fontSize: 14, fontWeight: 500 }}>
-                  👍 Like
-                </button>
-                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "#272727", border: "none", color: "#fff", padding: "8px 16px", borderRadius: 20, cursor: "pointer", fontSize: 14, fontWeight: 500 }}>
-                  ➕ Save
-                </button>
               </div>
             </div>
             <div style={{ marginTop: 12, background: "#272727", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#aaa" }}>

@@ -385,10 +385,10 @@ export default function Page() {
 
         {/* Sidebar — full width on portrait, fixed 360px on landscape/desktop */}
         <div style={{ flex: "1 1 300px", minWidth: 0, maxWidth: 400 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#aaa" }}>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: "#aaa" }}>
             Up Next ({filtered.length})
           </div>
-          <div style={{ height: 340, overflowY: "scroll", display: "flex", flexDirection: "column", gap: 8, paddingRight: 4, scrollbarWidth: "thin", scrollbarColor: "#444 transparent" }}>
+          <div style={{ height: "310px", overflowY: "scroll", overflowX: "hidden", display: "flex", flexDirection: "column", gap: 8, paddingRight: 6, boxSizing: "border-box", scrollbarWidth: "thin", scrollbarColor: "#555 #1a1a1a", border: "1px solid #222", borderRadius: 10, padding: 8 }}>
             {filtered.map(v => {
               const active = v.id === current?.id;
               return (

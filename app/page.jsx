@@ -313,8 +313,8 @@ export default function Page() {
       {/* Main layout — flex-row on wide screens, flex-col on narrow (portrait mobile) */}
       <div style={{ display: "flex", flexWrap: "wrap", maxWidth: 1400, margin: "0 auto", padding: "0 16px 24px", gap: 16 }}>
 
-        {/* Player column */}
-        <div style={{ flex: "1 1 300px", minWidth: 0 }}>
+        {/* Player column — sticky so it stays on screen while sidebar scrolls */}
+        <div style={{ flex: "1 1 300px", minWidth: 0, position: "sticky", top: 56, alignSelf: "flex-start" }}>
           <div style={{ position: "relative", background: "#000", borderRadius: 12,
             overflow: "hidden", aspectRatio: "16/9" }}>
             {current?.ytid ? (

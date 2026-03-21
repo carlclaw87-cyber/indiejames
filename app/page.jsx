@@ -112,7 +112,7 @@ function useEmbedChecker(videos) {
 // ─── Constants ───────────────────────────────────────────────────────────────
 const thumbFor = ytid => `https://i.ytimg.com/vi/${ytid}/mqdefault.jpg`;
 const srcFor   = ytid =>
-  `https://www.youtube-nocookie.com/embed/${ytid}?autoplay=1&rel=0&controls=1&playsinline=1&modestbranding=1&enablejsapi=1`;
+  `https://www.youtube-nocookie.com/embed/${ytid}?autoplay=1&rel=0&controls=1&playsinline=1&modestbranding=1&enablejsapi=1&origin=${typeof window !== "undefined" ? encodeURIComponent(window.location.origin) : ""}`;
 
 const TAGS = ["All","counting","abcs","phonics","colors","math","shapes","science","social","world","movement"];
 const PARENT_PIN = "1234";
@@ -131,12 +131,37 @@ export default function Page() {
   const [dur,          setDur]         = useState(30);
   const [kidMode,      setKidMode]     = useState(false);
   const [timeLeft,     setTimeLeft]    = useState(0);
+  const playerRef = useRef(null);
+  const filteredRef = useRef([]);
+  const currentIdRef = useRef(currentId);
 
   useEffect(() => {
     if (!kidMode || timeLeft <= 0) return;
     const t = setInterval(() => setTimeLeft(v => v - 1), 1000);
     return () => clearInterval(t);
   }, [kidMode, timeLeft]);
+
+  // Keep refs in sync so postMessage handler can read latest values
+  useEffect(() => { currentIdRef.current = currentId; }, [currentId]);
+  useEffect(() => { filteredRef.current = filtered; }, [filtered]);
+
+  // Auto-advance: listen for YouTube "video ended" postMessage and play next
+  useEffect(() => {
+    function onMsg(e) {
+      try {
+        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        // YouTube sends {event:"infoDelivery", info:{playerState:0}} when ended (state 0 = ended)
+        if (data?.event === "infoDelivery" && data?.info?.playerState === 0) {
+          const list = filteredRef.current;
+          const idx = list.findIndex(v => v.id === currentIdRef.current);
+          const next = list[idx + 1] || list[0]; // loop back to start
+          if (next) setCurrentId(next.id);
+        }
+      } catch {}
+    }
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
 
   // Only show videos that passed the embed check
   const available = useMemo(() =>

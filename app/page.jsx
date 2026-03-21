@@ -22,9 +22,9 @@ const VIDEOS = [
   { id: "v18", title: "Head Shoulders Knees & Toes",        channel: "ChuChu TV",            emoji: "🙋", ytid: "h4eueDYPTIg", duration: "2:55", tags: "movement" },
   { id: "v19", title: "Head Shoulders (Speeding Up)",       channel: "Super Simple Songs",   emoji: "🏃", ytid: "WX8HmogNyCY", duration: "2:44", tags: "movement" },
   { id: "v20", title: "Freeze Dance Party",                 channel: "The Kiboomers",        emoji: "❄️", ytid: "2UcZWXvgMZE", duration: "3:48", tags: "movement" },
-  { id: "v21", title: "Baby Shark Dance",                   channel: "Pinkfong",             emoji: "🦈", ytid: "XqZsoesa55w", duration: "2:16", tags: "movement" },
-  { id: "v22", title: "Baby Shark — Learn Animals",         channel: "Pinkfong",             emoji: "🐠", ytid: "ydPgDV7FNZY", duration: "3:01", tags: "counting" },
-  { id: "v23", title: "Baby Shark — Colors Song",           channel: "Pinkfong",             emoji: "🌈", ytid: "kHFbPBHV9qQ", duration: "2:44", tags: "colors" },
+  { id: "v21", title: "Baby Shark Doo Doo Doo 30 Min",      channel: "Baby Shark Official",  emoji: "🦈", ytid: "M4NXs3uAMF8", duration: "30:00", tags: "movement" },
+  { id: "v22", title: "Wheels on the Bus — Baby Shark",     channel: "Baby Shark Official",  emoji: "🚌", ytid: "pyVwLnS92tk", duration: "15:00", tags: "counting" },
+  { id: "v23", title: "Hide and Seek with Baby Shark",      channel: "Baby Shark Official",  emoji: "🌈", ytid: "rEt2DvIj4dw", duration: "10:00", tags: "social" },
   // Mrs. Rachel
   { id: "v24", title: "Learn with Ms Rachel — ABCs & Phonics",     channel: "Ms Rachel",   emoji: "👩‍🏫", ytid: "oVtzNpzuvoA", duration: "45:00", tags: "phonics" },
   { id: "v25", title: "Learn to Talk with Ms Rachel — Colors",     channel: "Ms Rachel",   emoji: "🎨", ytid: "VvoO9-L1KA4", duration: "46:00", tags: "colors" },

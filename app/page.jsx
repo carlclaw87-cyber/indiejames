@@ -112,7 +112,7 @@ function useEmbedChecker(videos) {
 // ─── Constants ───────────────────────────────────────────────────────────────
 const thumbFor = ytid => `https://i.ytimg.com/vi/${ytid}/mqdefault.jpg`;
 const srcFor   = ytid =>
-  `https://www.youtube-nocookie.com/embed/${ytid}?autoplay=1&rel=0&controls=1&playsinline=1&modestbranding=1&enablejsapi=1&origin=${typeof window !== "undefined" ? encodeURIComponent(window.location.origin) : ""}`;
+  `https://www.youtube-nocookie.com/embed/${ytid}?autoplay=1&rel=0&controls=1&playsinline=1&modestbranding=1&enablejsapi=1`;
 
 const TAGS = ["All","counting","abcs","phonics","colors","math","shapes","science","social","world","movement"];
 const PARENT_PIN = "1234";
@@ -131,7 +131,6 @@ export default function Page() {
   const [dur,          setDur]         = useState(30);
   const [kidMode,      setKidMode]     = useState(false);
   const [timeLeft,     setTimeLeft]    = useState(0);
-  const playerRef = useRef(null);
   const filteredRef = useRef([]);
   const currentIdRef = useRef(currentId);
 

@@ -363,7 +363,7 @@ export default function Page() {
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#aaa" }}>
             Up Next ({filtered.length})
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 320, overflowY: "auto", scrollbarWidth: "thin", scrollbarColor: "#444 transparent" }}>
+          <div style={{ height: 340, overflowY: "scroll", display: "flex", flexDirection: "column", gap: 8, paddingRight: 4, scrollbarWidth: "thin", scrollbarColor: "#444 transparent" }}>
             {filtered.map(v => {
               const active = v.id === current?.id;
               return (

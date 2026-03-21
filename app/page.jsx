@@ -310,11 +310,11 @@ export default function Page() {
         ))}
       </div>
 
-      {/* Main layout */}
-      <div style={{ display: "flex", maxWidth: 1400, margin: "0 auto", padding: "0 16px 24px", gap: 0 }}>
+      {/* Main layout — flex-row on wide screens, flex-col on narrow (portrait mobile) */}
+      <div style={{ display: "flex", flexWrap: "wrap", maxWidth: 1400, margin: "0 auto", padding: "0 16px 24px", gap: 16 }}>
 
         {/* Player column */}
-        <div style={{ flex: "1 1 0", minWidth: 0, marginRight: 24 }}>
+        <div style={{ flex: "1 1 300px", minWidth: 0 }}>
           <div style={{ position: "relative", background: "#000", borderRadius: 12,
             overflow: "hidden", aspectRatio: "16/9" }}>
             {current?.ytid ? (
@@ -358,8 +358,8 @@ export default function Page() {
           )}
         </div>
 
-        {/* Sidebar */}
-        <div style={{ width: 400, flexShrink: 0 }}>
+        {/* Sidebar — full width on portrait, fixed 360px on landscape/desktop */}
+        <div style={{ flex: "1 1 300px", minWidth: 0, maxWidth: 400 }}>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#aaa" }}>
             Up Next ({filtered.length})
           </div>
@@ -374,8 +374,8 @@ export default function Page() {
                     borderRadius: 8, padding: 6, cursor: "pointer",
                     textAlign: "left", color: "#fff", width: "100%" }}>
                   <div style={{ position: "relative", flexShrink: 0 }}>
-                    <img src={thumbFor(v.ytid)} alt={v.title} width={168} height={94}
-                      style={{ borderRadius: 8, display: "block", objectFit: "cover", background: "#1a1a1a" }} />
+                    <img src={thumbFor(v.ytid)} alt={v.title} width={120} height={68}
+                      style={{ borderRadius: 8, display: "block", objectFit: "cover", background: "#1a1a1a", width: "clamp(100px,30%,168px)", height: "auto" }} />
                     <div style={{ position: "absolute", bottom: 4, right: 4,
                       background: "rgba(0,0,0,0.8)", borderRadius: 3,
                       padding: "1px 4px", fontSize: 11, fontWeight: 600 }}>

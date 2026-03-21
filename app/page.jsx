@@ -25,6 +25,14 @@ const VIDEOS = [
   { id: "v21", title: "Baby Shark Dance",                   channel: "Pinkfong",             emoji: "🦈", ytid: "XqZsoesa55w", duration: "2:16", tags: "movement" },
   { id: "v22", title: "Baby Shark — Learn Animals",         channel: "Pinkfong",             emoji: "🐠", ytid: "ydPgDV7FNZY", duration: "3:01", tags: "counting" },
   { id: "v23", title: "Baby Shark — Colors Song",           channel: "Pinkfong",             emoji: "🌈", ytid: "kHFbPBHV9qQ", duration: "2:44", tags: "colors" },
+  // Mrs. Rachel
+  { id: "v24", title: "Learn with Ms Rachel — ABCs & Phonics",     channel: "Ms Rachel",   emoji: "👩‍🏫", ytid: "oVtzNpzuvoA", duration: "45:00", tags: "phonics" },
+  { id: "v25", title: "Learn to Talk with Ms Rachel — Colors",     channel: "Ms Rachel",   emoji: "🎨", ytid: "VvoO9-L1KA4", duration: "46:00", tags: "colors" },
+  { id: "v26", title: "Toddler Learning — Songs & Milestones",     channel: "Ms Rachel",   emoji: "🌟", ytid: "h67AgK4EHq4", duration: "60:00", tags: "social" },
+  // Bluey
+  { id: "v27", title: "Bluey Full Episode Compilation",            channel: "Bluey",        emoji: "🐕", ytid: "A0hzzMFm9Ng", duration: "60:00", tags: "social" },
+  { id: "v28", title: "Bluey — Funny Moments Compilation",         channel: "Bluey",        emoji: "😂", ytid: "frIcCfpNRQs", duration: "30:00", tags: "social" },
+  { id: "v29", title: "Bluey — Four in the Bed & Best Clips",      channel: "Bluey",        emoji: "🛏️", ytid: "Y6pa9ed1Fb0", duration: "30:00", tags: "counting" },
 ];
 
 // ─── Embed availability checker ─────────────────────────────────────────────

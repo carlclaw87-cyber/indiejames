@@ -114,7 +114,7 @@ export default function Page() {
         <div style={{ background: "#1a1a1a", borderRadius: 12, padding: 20, marginBottom: 20 }}>
           <div style={{ fontWeight: 600, marginBottom: 12, fontSize: 16 }}>⏱️ Session Duration</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {[20, 30, 45, 60].map(d => (
+            {[10, 20, 30, 60].map(d => (
               <button key={d} onClick={() => setDur(d)}
                 style={{ padding: "10px 20px", borderRadius: 20, border: "none",
                   cursor: "pointer", fontWeight: 600, fontSize: 14,

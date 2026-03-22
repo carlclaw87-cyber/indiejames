@@ -63,28 +63,56 @@ export default function Page() {
   useEffect(() => { currentIdRef.current = currentId; }, [currentId]);
   useEffect(() => { filteredRef.current  = filtered;  }, [filtered]);
 
-  // countdown timer
+  // countdown timer — stops at 0
   useEffect(() => {
     if (!kidMode || timeLeft <= 0) return;
-    const t = setInterval(() => setTimeLeft(v => v - 1), 1000);
+    const t = setInterval(() => setTimeLeft(v => {
+      if (v <= 1) { setKidMode(false); return 0; }
+      return v - 1;
+    }), 1000);
     return () => clearInterval(t);
   }, [kidMode, timeLeft]);
 
-  // auto-advance when YouTube fires playerState=0 (ended)
+  // parse "3:12" → seconds for fallback advance
+  function parseDuration(d) {
+    const p = (d || "").split(":").map(Number);
+    if (p.length === 2) return p[0] * 60 + p[1];
+    if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2];
+    return 300; // default 5 min
+  }
+
+  // auto-advance: YouTube postMessage (primary) + duration fallback
   useEffect(() => {
+    let fallbackTimer = null;
+
+    function advance() {
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      const list = filteredRef.current;
+      const idx  = list.findIndex(v => v.id === currentIdRef.current);
+      const next = list[(idx + 1) % list.length];
+      if (next) setCurrentId(next.id);
+    }
+
     function onMsg(e) {
       try {
         const d = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
-        if (d?.event === "infoDelivery" && d?.info?.playerState === 0) {
-          const list = filteredRef.current;
-          const idx  = list.findIndex(v => v.id === currentIdRef.current);
-          const next = list[(idx + 1) % list.length];
-          if (next) setCurrentId(next.id);
+        // playerState 1 = playing → reset fallback timer
+        if (d?.event === "infoDelivery" && d?.info?.playerState === 1) {
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          const cur = VIDEOS.find(v => v.id === currentIdRef.current);
+          const secs = parseDuration(cur?.duration) + 5;
+          fallbackTimer = setTimeout(advance, secs * 1000);
         }
+        // playerState 0 = ended → advance immediately
+        if (d?.event === "infoDelivery" && d?.info?.playerState === 0) advance();
       } catch {}
     }
+
     window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
+    return () => {
+      window.removeEventListener("message", onMsg);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+    };
   }, []);
 
   function tryPin() {
@@ -93,6 +121,24 @@ export default function Page() {
     } else {
       setPinError(true); setPinInput("");
     }
+  }
+
+  // ── Time's up screen ─────────────────────────────────────────────────────
+  if (!kidMode && timeLeft === 0 && dur > 0) {
+    return (
+      <div style={{ background: "#0f0f0f", minHeight: "100vh", color: "#fff",
+        fontFamily: "Roboto, Arial, sans-serif", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: 24, padding: 32, textAlign: "center" }}>
+        <div style={{ fontSize: 72 }}>🌙</div>
+        <div style={{ fontSize: 28, fontWeight: 700 }}>All done for now!</div>
+        <div style={{ color: "#aaa", fontSize: 16 }}>Great watching, Indie! Time for something else.</div>
+        <button onClick={() => { setDur(0); setTimeLeft(0); }}
+          style={{ marginTop: 16, background: "#272727", border: "none", color: "#fff",
+            padding: "12px 28px", borderRadius: 12, fontSize: 16, cursor: "pointer" }}>
+          Back to Videos
+        </button>
+      </div>
+    );
   }
 
   // ── Parent dashboard ──────────────────────────────────────────────────────

@@ -193,9 +193,14 @@ export default function Page() {
             <span style={{ fontWeight: 700, fontSize: 18 }}>IndieTube</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {kidMode && (
-              <span style={{ fontSize: 13, color: "#34d399", fontWeight: 600 }}>
-                ⏱️ {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+            {kidMode ? (
+              <span style={{ fontSize: 13, color: timeLeft < 120 ? "#ff6b6b" : "#34d399", fontWeight: 700,
+                background: "#1a1a1a", padding: "4px 10px", borderRadius: 20, border: "1px solid #333" }}>
+                ⏱️ {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")} left
+              </span>
+            ) : (
+              <span style={{ fontSize: 12, color: "#555", padding: "4px 10px" }}>
+                🔒 tap to set timer
               </span>
             )}
             <button onClick={() => setShowPinModal(true)}
@@ -203,12 +208,12 @@ export default function Page() {
                 padding: "6px 12px", borderRadius: 20, cursor: "pointer", fontSize: 13 }}>🔒</button>
           </div>
         </div>
-        {kidMode && (
-          <div style={{ height: 4, background: "#272727", borderRadius: 99, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${(timeLeft / (dur * 60)) * 100}%`,
-              background: "linear-gradient(90deg,#34d399,#60a5fa)", transition: "width 1s linear" }} />
-          </div>
-        )}
+        <div style={{ height: 4, background: "#272727", borderRadius: 99, overflow: "hidden" }}>
+          <div style={{ height: "100%",
+            width: kidMode && dur > 0 ? `${(timeLeft / (dur * 60)) * 100}%` : "0%",
+            background: timeLeft < 120 ? "#ff6b6b" : "linear-gradient(90deg,#34d399,#60a5fa)",
+            transition: "width 1s linear" }} />
+        </div>
       </div>
 
       {/* Filter chips */}

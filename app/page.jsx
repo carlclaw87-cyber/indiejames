@@ -73,47 +73,28 @@ export default function Page() {
     return () => clearInterval(t);
   }, [kidMode, timeLeft]);
 
-  // parse "3:12" → seconds for fallback advance
+  // parse "3:12" or "60:00" → seconds
   function parseDuration(d) {
     const p = (d || "").split(":").map(Number);
     if (p.length === 2) return p[0] * 60 + p[1];
     if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2];
-    return 300; // default 5 min
+    return 300;
   }
 
-  // auto-advance: YouTube postMessage (primary) + duration fallback
+  // auto-advance: pure timer-based, fires after video duration elapses
+  // resets every time currentId changes (new video loaded)
   useEffect(() => {
-    let fallbackTimer = null;
-
-    function advance() {
-      if (fallbackTimer) clearTimeout(fallbackTimer);
-      const list = filteredRef.current;
-      const idx  = list.findIndex(v => v.id === currentIdRef.current);
-      const next = list[(idx + 1) % list.length];
-      if (next) setCurrentId(next.id);
-    }
-
-    function onMsg(e) {
-      try {
-        const d = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
-        // playerState 1 = playing → reset fallback timer
-        if (d?.event === "infoDelivery" && d?.info?.playerState === 1) {
-          if (fallbackTimer) clearTimeout(fallbackTimer);
-          const cur = VIDEOS.find(v => v.id === currentIdRef.current);
-          const secs = parseDuration(cur?.duration) + 5;
-          fallbackTimer = setTimeout(advance, secs * 1000);
-        }
-        // playerState 0 = ended → advance immediately
-        if (d?.event === "infoDelivery" && d?.info?.playerState === 0) advance();
-      } catch {}
-    }
-
-    window.addEventListener("message", onMsg);
-    return () => {
-      window.removeEventListener("message", onMsg);
-      if (fallbackTimer) clearTimeout(fallbackTimer);
-    };
-  }, []);
+    const cur  = VIDEOS.find(v => v.id === currentId);
+    const secs = parseDuration(cur?.duration) + 8; // +8s buffer for load/ads
+    const t = setTimeout(() => {
+      setCurrentId(prev => {
+        const list = filteredRef.current;
+        const idx  = list.findIndex(v => v.id === prev);
+        return list[(idx + 1) % list.length]?.id || prev;
+      });
+    }, secs * 1000);
+    return () => clearTimeout(t);
+  }, [currentId]);
 
   function tryPin() {
     if (pinInput === PARENT_PIN) {

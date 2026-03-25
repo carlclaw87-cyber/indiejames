@@ -104,7 +104,7 @@ export default function Page() {
     }
   }
 
-  // ── Time's up screen ─────────────────────────────────────────────────────
+  // ── Time's up screen — PIN required to dismiss ───────────────────────────
   if (!kidMode && timeLeft === 0 && dur > 0) {
     return (
       <div style={{ background: "#0f0f0f", minHeight: "100vh", color: "#fff",
@@ -112,12 +112,39 @@ export default function Page() {
         alignItems: "center", justifyContent: "center", gap: 24, padding: 32, textAlign: "center" }}>
         <div style={{ fontSize: 72 }}>🌙</div>
         <div style={{ fontSize: 28, fontWeight: 700 }}>All done for now!</div>
-        <div style={{ color: "#aaa", fontSize: 16 }}>Great watching, Indie! Time for something else.</div>
-        <button onClick={() => { setDur(0); setTimeLeft(0); }}
-          style={{ marginTop: 16, background: "#272727", border: "none", color: "#fff",
-            padding: "12px 28px", borderRadius: 12, fontSize: 16, cursor: "pointer" }}>
-          Back to Videos
-        </button>
+        <div style={{ color: "#aaa", fontSize: 16, maxWidth: 280 }}>Great watching, Indie! Time for something else.</div>
+        {showPinModal && (
+          <div style={{ background: "#1a1a1a", borderRadius: 16, padding: 28, width: 280, textAlign: "center" }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12 }}>Parent PIN to continue</div>
+            <input type="password" value={pinInput}
+              onChange={e => setPinInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && (() => {
+                if (pinInput === PARENT_PIN) { setDur(0); setTimeLeft(0); setShowPinModal(false); setPinInput(""); }
+                else { setPinError(true); setPinInput(""); }
+              })()}
+              placeholder="PIN" maxLength={6}
+              style={{ width: "100%", padding: 12, borderRadius: 10,
+                border: pinError ? "2px solid #ff4444" : "2px solid #333",
+                background: "#111", color: "#fff", fontSize: 20, textAlign: "center",
+                outline: "none", boxSizing: "border-box" }} />
+            {pinError && <div style={{ color: "#ff4444", fontSize: 12, marginTop: 6 }}>Incorrect PIN</div>}
+            <button onClick={() => {
+              if (pinInput === PARENT_PIN) { setDur(0); setTimeLeft(0); setShowPinModal(false); setPinInput(""); setPinError(false); }
+              else { setPinError(true); setPinInput(""); }
+            }}
+              style={{ marginTop: 12, width: "100%", padding: 12, borderRadius: 10, border: "none",
+                background: "#ff0000", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 15 }}>
+              Unlock
+            </button>
+          </div>
+        )}
+        {!showPinModal && (
+          <button onClick={() => setShowPinModal(true)}
+            style={{ marginTop: 8, background: "#272727", border: "none", color: "#aaa",
+              padding: "10px 24px", borderRadius: 12, fontSize: 14, cursor: "pointer" }}>
+            🔒 Parent — Back to Videos
+          </button>
+        )}
       </div>
     );
   }
@@ -231,8 +258,11 @@ export default function Page() {
               </span>
             )}
             <button onClick={() => setShowPinModal(true)}
-              style={{ background: "transparent", border: "1px solid #333", color: "#aaa",
-                padding: "6px 12px", borderRadius: 20, cursor: "pointer", fontSize: 13 }}>🔒</button>
+              style={{ background: kidMode ? "#1a1a1a" : "transparent",
+                border: "1px solid #333", color: "#aaa",
+                padding: "6px 12px", borderRadius: 20, cursor: "pointer", fontSize: 13 }}>
+              {kidMode ? "🔒 Parent" : "🔒"}
+            </button>
           </div>
         </div>
         <div style={{ height: 4, background: "#272727", borderRadius: 99, overflow: "hidden" }}>

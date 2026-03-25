@@ -31,6 +31,30 @@ const VIDEOS = [
   { id: "v27", title: "Bluey Full Episode Compilation",   channel: "Bluey",               emoji: "🐕", ytid: "A0hzzMFm9Ng", duration: "60:00", tags: "social" },
   { id: "v28", title: "Bluey — Funny Moments",            channel: "Bluey",               emoji: "😂", ytid: "frIcCfpNRQs", duration: "30:00", tags: "social" },
   { id: "v29", title: "Bluey — Four in the Bed & More",   channel: "Bluey",               emoji: "🛏️", ytid: "Y6pa9ed1Fb0", duration: "30:00", tags: "counting" },
+  // Kiboomers
+  { id: "v30", title: "Follow the Colors & Jump!",        channel: "The Kiboomers",       emoji: "🌈", ytid: "k9YhAf_VXZQ", duration: "3:00", tags: "colors" },
+  { id: "v31", title: "Stomp Stomp Wiggle Wiggle!",       channel: "The Kiboomers",       emoji: "🕺", ytid: "poqku6QYr5E", duration: "2:30", tags: "movement" },
+  { id: "v32", title: "Wheels on the Bus — Opposites",    channel: "The Kiboomers",       emoji: "🚌", ytid: "kHniNzmGnYI", duration: "3:00", tags: "abcs" },
+  { id: "v33", title: "Fairy Dust Freeze Dance",          channel: "The Kiboomers",       emoji: "🧚", ytid: "ztUT6pe-VwY", duration: "3:00", tags: "movement" },
+  { id: "v34", title: "5 Muddy Piggies Countdown",        channel: "The Kiboomers",       emoji: "🐷", ytid: "HA0r4uiGrOU", duration: "2:30", tags: "counting" },
+  // Jack Hartmann
+  { id: "v35", title: "Sing the Letters & Sounds",        channel: "Jack Hartmann",       emoji: "🗣️", ytid: "p23J9-JubRM", duration: "4:00", tags: "phonics" },
+  { id: "v36", title: "Move Like the Animals",            channel: "Jack Hartmann",       emoji: "🐾", ytid: "aiO53O7oFKw", duration: "5:00", tags: "movement" },
+  { id: "v37", title: "The Self-Care Song",               channel: "Jack Hartmann",       emoji: "🧼", ytid: "-EqfaGvPsto", duration: "3:30", tags: "social" },
+  { id: "v38", title: "Amazing Animal Habitats",          channel: "Jack Hartmann",       emoji: "🦁", ytid: "knynl6dFonU", duration: "6:00", tags: "science" },
+  { id: "v39", title: "Three Little Pigs Groove",         channel: "Jack Hartmann",       emoji: "🐷", ytid: "eVICiFz3Znw", duration: "4:00", tags: "social" },
+  // KidsTV123
+  { id: "v40", title: "Letter Sounds Song",               channel: "KidsTV123",           emoji: "🔤", ytid: "DoAQa1o-UVw", duration: "3:30", tags: "phonics" },
+  { id: "v41", title: "Months of the Year Song",          channel: "KidsTV123",           emoji: "📅", ytid: "N0xRTIGfuoU", duration: "2:30", tags: "counting" },
+  { id: "v42", title: "Days of the Week Song",            channel: "KidsTV123",           emoji: "📆", ytid: "cxEgAlpOLjI", duration: "2:30", tags: "counting" },
+  { id: "v43", title: "The Robot Colors Song",            channel: "KidsTV123",           emoji: "🤖", ytid: "1SYUnwHAJTQ", duration: "2:30", tags: "colors" },
+  { id: "v44", title: "We've Got All the Colors",         channel: "KidsTV123",           emoji: "🎨", ytid: "_5RBO7CThoY", duration: "2:30", tags: "colors" },
+  // Super Simple Songs extras
+  { id: "v45", title: "Where Is the Cat? Prepositions",   channel: "Super Simple Songs",  emoji: "🐱", ytid: "pZ7H3XuEFkQ", duration: "3:00", tags: "abcs" },
+  { id: "v46", title: "Animals on the Farm",              channel: "Super Simple Songs",  emoji: "🐮", ytid: "9FcCV286-gA", duration: "3:00", tags: "science" },
+  { id: "v47", title: "Top 20 Feelings Songs",            channel: "Super Simple Songs",  emoji: "❤️", ytid: "TR1bXXQVKtY", duration: "60:00", tags: "social" },
+  { id: "v48", title: "Do You Have a Crayon?",            channel: "Super Simple Songs",  emoji: "✏️", ytid: "dbklZrO5H78", duration: "3:00", tags: "colors" },
+  { id: "v49", title: "Can You Please Help Me?",          channel: "Super Simple Songs",  emoji: "🙏", ytid: "OjmWon9KebI", duration: "3:00", tags: "social" },
 ];
 
 const thumbFor = ytid => `https://i.ytimg.com/vi/${ytid}/mqdefault.jpg`;
@@ -51,8 +75,10 @@ export default function Page() {
   const [kidMode,      setKidMode]     = useState(false);
   const [timeLeft,     setTimeLeft]    = useState(0);
 
-  const filteredRef  = useRef([]);
-  const currentIdRef = useRef(currentId);
+  const filteredRef   = useRef([]);
+  const currentIdRef  = useRef(currentId);
+  const playedIdsRef  = useRef(new Set());
+  const shuffleQRef   = useRef([]);
 
   const current  = useMemo(() => VIDEOS.find(v => v.id === currentId) || VIDEOS[0], [currentId]);
   const filtered = useMemo(() =>
@@ -61,7 +87,32 @@ export default function Page() {
 
   // keep refs fresh for event handlers
   useEffect(() => { currentIdRef.current = currentId; }, [currentId]);
-  useEffect(() => { filteredRef.current  = filtered;  }, [filtered]);
+  useEffect(() => { filteredRef.current  = filtered; shuffleQRef.current = []; }, [filtered]);
+
+  // Fisher-Yates shuffle
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // pick next video: shuffled queue, no repeats until all played
+  function nextVideo() {
+    const list = filteredRef.current;
+    if (!list.length) return;
+    const played = playedIdsRef.current;
+    played.add(currentIdRef.current);
+    // refill queue if exhausted
+    if (!shuffleQRef.current.length) {
+      shuffleQRef.current = shuffle(list.map(v => v.id)).filter(id => id !== currentIdRef.current);
+      played.clear();
+    }
+    const nextId = shuffleQRef.current.shift();
+    if (nextId) setCurrentId(nextId);
+  }
 
   // countdown timer — stops at 0
   useEffect(() => {
@@ -81,18 +132,11 @@ export default function Page() {
     return 300;
   }
 
-  // auto-advance: pure timer-based, fires after video duration elapses
-  // resets every time currentId changes (new video loaded)
+  // auto-advance: timer fires after video duration, then shuffled next video
   useEffect(() => {
     const cur  = VIDEOS.find(v => v.id === currentId);
-    const secs = parseDuration(cur?.duration) + 8; // +8s buffer for load/ads
-    const t = setTimeout(() => {
-      setCurrentId(prev => {
-        const list = filteredRef.current;
-        const idx  = list.findIndex(v => v.id === prev);
-        return list[(idx + 1) % list.length]?.id || prev;
-      });
-    }, secs * 1000);
+    const secs = parseDuration(cur?.duration) + 8;
+    const t = setTimeout(nextVideo, secs * 1000);
     return () => clearTimeout(t);
   }, [currentId]);
 
